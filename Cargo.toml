@@ -1,0 +1,9 @@
+[package]
+name = "monitor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-files = "0.6.6"
+sysinfo = "0.35.2"
