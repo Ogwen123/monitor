@@ -50,17 +50,27 @@ struct Stats {
     disk: Vec<DiskUsage>,
 }
 
+fn get_dir_path() -> String {
+    if std::env::consts::OS == "linux" {
+        "src/pages/".to_string()
+    } else if std::env::consts::OS == "windows" {
+        "src\\pages\\".to_string()
+    } else {
+        "".to_string()
+    }
+}
+
 #[get("/")]
 async fn index() -> actix_web::Result<NamedFile> {
     let mut path: PathBuf = current_dir()?;
-    path.push("src\\pages\\index.html");
+    path.push(get_dir_path() + "index.html");
     Ok(NamedFile::open(path)?)
 }
 
 #[get("/index.css")] // why do i have to do this 💀
 async fn css() -> actix_web::Result<NamedFile> {
     let mut path: PathBuf = current_dir()?;
-    path.push("src\\pages\\index.css");
+    path.push( get_dir_path() + "index.css");
     Ok(NamedFile::open(path)?)
 }
 
