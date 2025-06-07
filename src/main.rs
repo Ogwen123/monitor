@@ -64,6 +64,7 @@ fn get_dir_path() -> String {
 async fn index() -> actix_web::Result<NamedFile> {
     let mut path: PathBuf = current_dir()?;
     path.push(get_dir_path() + "index.html");
+    println!("{:?}", path);
     Ok(NamedFile::open(path)?)
 }
 
@@ -71,6 +72,7 @@ async fn index() -> actix_web::Result<NamedFile> {
 async fn css() -> actix_web::Result<NamedFile> {
     let mut path: PathBuf = current_dir()?;
     path.push( get_dir_path() + "index.css");
+    println!("{:?}", path);
     Ok(NamedFile::open(path)?)
 }
 
