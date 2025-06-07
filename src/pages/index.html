@@ -1,8 +1,155 @@
 <html>
     <head>
+        <link rel="stylesheet" href="index.css" />
+        <script>
+            const YELLOW_THRESHOLD = 50;
+            const ORANGE_THRESHOLD = 80;
+            const RED_THRESHOLD = 99;
 
+            const secondsToFormattedTime = (seconds) => {
+                const ds = 86400
+                const hs = 3600
+                const ms = 60
+
+                const days = Math.floor(seconds / ds)
+                const hours = Math.floor((seconds - days * ds) / hs)
+                const minutes = Math.floor((seconds - days * ds - hours * hs) / ms)
+                const _seconds = seconds - days * ds - hours * hs - minutes * ms
+
+                return (days > 0 ? days + ":" : "") +
+                    (hours > 0 || (hours === 0 && days !== 0) ? hours + ":" : "") +
+                    (minutes > 0 || (minutes === 0 && hours !== 0 && days !== 0) ? minutes + ":" : "") +
+                    _seconds
+            }
+
+            const updateDisplay = (data) => {
+                // set navbar info
+                const navbar = document.getElementById("nav")
+                navbar.innerHTML = `<div class="nav-name">${data.name}</div><div class="nav-info">${data.os}, ${data.architecture}</div>`
+                document.getElementById("title").innerText = `Monitor: ${data.name}`
+
+                // set cpu info
+                document.getElementById("cpu-name").innerText = data.cpu.name
+
+                // work out cpu graph dimensions, gets the factor pair with the smallest difference
+                const coreCount = data.cpu.cores.length
+                let pairs = [coreCount, 1]
+                for (let i = 2; i < Math.ceil(Math.sqrt(coreCount)); i++) {
+                    if (Number.isInteger(coreCount/i)) {
+                        if ((Math.max(i, coreCount/i) - Math.min(i, coreCount/i)) < (pairs[0] - pairs[1])) {
+                            pairs = [Math.max(i, coreCount/i), Math.min(i, coreCount/i)]
+                        }
+                    }
+                }
+
+                const coreContainer = document.getElementById("core-container")
+                coreContainer.style = `grid-template-columns: repeat(${pairs[0]}, 60px); grid-template-rows: repeat(${pairs[1]}, 60px);`
+
+                for (let i = 0; i < coreCount; i++) {
+                    let core = data.cpu.cores[i]
+                    coreContainer.innerHTML += `
+                    <div class="core">
+                    <div class="core-background" style="background-color: ${core.usage > RED_THRESHOLD ? "#c0392b" : core.usage > ORANGE_THRESHOLD ? "#e67e22" : core.usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; height: ${Math.round(core.usage)}%;"></div>
+                    <span class="core-label">${Math.round(core.usage)}%</span>
+                    </div>
+                    `
+                }
+
+                const usage = data.cpu.average_usage
+                document.getElementById("overall-usage-bar-background") .style = `background-color: ${usage > RED_THRESHOLD ? "#c0392b" : usage > ORANGE_THRESHOLD ? "#e67e22" : usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; height: ${Math.round(usage)}%;`
+
+                document.getElementById("overall-usage-label").innerText = Math.round(data.cpu.average_usage) + "%"
+
+                document.getElementById("core-count-info").innerText = data.cpu.cores.length + " Cores"
+                document.getElementById("freq-info").innerText = data.cpu.frequency + " MHz (Base Clock)"
+                document.getElementById("uptime-info").innerText = secondsToFormattedTime(data.uptime)
+            }
+
+            const showError = (message) => {
+                const error = document.getElementById("error")
+                error.innerText = message
+                error.hidden = false
+
+            }
+
+            // fetch the data
+            const fetch_data = () => {
+                fetch("/stats", {
+                    method: "GET"
+                }).then((res) => {
+                    if (!res.ok) {
+                        showError()
+                    } else {
+                        res.json().then((data) => {
+                            updateDisplay(data)
+                        })
+                    }
+                })
+            }
+            fetch_data()
+        </script>
+        <style>
+
+
+        </style>
+        <title id="title">Monitor: Loading...</title>
     </head>
     <body>
-        <h1>From an external file</h1>
+        <nav id="nav"></nav>
+        <div class="parent-container">
+            <div id="error" hidden="hidden"></div>
+            <div class="container" id="top-container">
+                <div class="card" id="cpu-card">
+                    <div id="cpu-name" class="title"></div>
+                    <div class="container">
+                        <div class="col-container" id="per-core-container">
+                            <div class="label">Per Core Usage</div>
+                            <div id="core-container">
+
+                            </div>
+                        </div>
+                        <div class="col-container" id="all-core-container">
+                            <div class="label">Overall Usage</div>
+                            <div id="overall-container" class="container">
+                                <div class="col-container" style="padding: 0;">
+                                    <div id="overall-usage-bar">
+                                        <div id="overall-usage-bar-background"></div>
+                                    </div>
+                                    <div id="overall-usage-label">
+                                        Loading...
+                                    </div>
+                                </div>
+                                <div class="col-container" id="cpu-info-container">
+                                    <div class="info-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="height: 24px; width: 24px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
+                                        </svg>
+                                        <div class="info" id="core-count-info">Loading...</div>
+                                    </div>
+                                    <div class="info-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  style="height: 24px; width: 24px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
+                                        </svg>
+
+                                        <div class="info" id="freq-info">Loading...</div>
+                                    </div>
+                                    <div class="info-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="height: 24px; width: 24px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+
+                                        <div class="info" id="uptime-info">Loading...</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" id="memory-card"></div>
+            </div>
+            <div class="card" id="disk-card"></div>
+        </div>
     </body>
 </html>

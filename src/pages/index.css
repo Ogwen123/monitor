@@ -1,0 +1,185 @@
+body {
+    background-color: #22272e;
+    min-height: 100vh;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+    color: white;
+    font-family: 'Trebuchet MS', sans-serif;
+}
+
+#error {
+    background-color: #c0392b;
+}
+
+/* general classes */
+.parent-container {
+    margin: 10px;
+    min-height: calc(93vh - 20px);
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+.col-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    background-color: #1c2128;
+    min-width: 350px;
+    min-height: 375px;
+    padding: 10px;
+}
+
+.title {
+    font-size: x-large;
+    padding-bottom: 5px;
+    color: #bebebe;
+}
+
+.label {
+    font-size: large;
+    padding-bottom: 5px;
+}
+
+/* navigation bar  */
+nav {
+    background-color: #1c2128;
+    width: 100vw;
+    height: 7vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.nav-name {
+    font-size: xxx-large;
+    display: flex;
+    align-items: end;
+    margin: 5px;
+}
+
+.nav-info {
+    display: flex;
+    color: #bebebe;
+    font-size: small;
+    align-items: end;
+    margin: 5px;
+}
+
+/* specific cards */
+
+#cpu-card, #memory-card {
+    width: calc(50% - 5px);
+}
+
+#cpu-card {
+    margin-right: 5px;
+}
+
+#memory-card {
+    margin-left: 5px;
+}
+
+#top-container {
+    margin-bottom: 10px;
+}
+
+/* within cpu card */
+#core-container {
+    display: grid;
+    column-gap: 5px;
+    row-gap: 5px;
+}
+
+#all-core-container {
+    padding-left: 10px;
+    width: 100%;
+}
+
+#per-core-container {
+    padding-right: 10px;
+}
+
+#overall-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.core {
+    border: #444c56 1px solid;
+    border-radius: 5px;
+    color: #bebebe;
+    position: relative;
+    overflow: hidden;
+}
+
+.core-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    position: absolute;
+    width: 60px;
+    height: 60px;
+
+}
+
+.core-background {
+    width: 60px;
+    z-index: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+#overall-usage-bar {
+    width: 200px;
+    height: 255px;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    border: #444c56 1px solid;
+}
+
+#overall-usage-bar-background {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+#overall-usage-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+#cpu-info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    width: 100%;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    width: 100%;
+}
+
+.info {
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+}
