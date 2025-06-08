@@ -57,11 +57,15 @@ fn get_dir_path() -> String {
     if std::env::consts::OS == "linux" {
         let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("/").collect();
         path_vec.pop();
-        (path_vec.join("/") + "/pages/").to_string()
+        path_vec.pop();
+        path_vec.pop();
+        (path_vec.join("/") + "/src/pages/").to_string()
     } else if std::env::consts::OS == "windows" {
         let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("\\").collect();
         path_vec.pop();
-        (path_vec.join("\\") + "\\pages\\").to_string()
+        path_vec.pop();
+        path_vec.pop();
+        (path_vec.join("\\") + "\\src\\pages\\").to_string()
     } else {
         "".to_string()
     }
@@ -84,12 +88,6 @@ async fn stats() -> Result<HttpResponse, Error> {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    sys.refresh_cpu_usage();
-    task::sleep(time::Duration::from_millis(500)).await;
-
-    // Second refresh to compute usage
-    sys.refresh_cpu_usage();
-
     // get cpu data
     let mut cpu_stats = CpuStats {
         name: sys.cpus()[0].brand().trim().parse()?,
@@ -97,6 +95,7 @@ async fn stats() -> Result<HttpResponse, Error> {
         frequency: 0,
         cores: Vec::new()
     };
+
     let mut frequency_total: u64 = 0;
     for cpu in sys.cpus() {
         let core = CoreUsage {
@@ -149,6 +148,7 @@ async fn stats() -> Result<HttpResponse, Error> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("{}", std::env::consts::OS);
+    println!("{:?}", sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
     if sysinfo::IS_SUPPORTED_SYSTEM == false {
         fatal!("This is not a supported operating system.");
         std::process::exit(1);

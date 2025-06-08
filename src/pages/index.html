@@ -9,7 +9,7 @@
             const secondsToFormattedTime = (seconds) => {
 
                 const fixLength = (time) => {
-                    if (time.length === 1) {
+                    if (time < 10) {
                         return "0" + time
                     } else {
                         return time
