@@ -84,10 +84,11 @@ async fn stats() -> Result<HttpResponse, Error> {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    task::sleep(time::Duration::from_millis(100)).await;
+    sys.refresh_cpu_usage();
+    task::sleep(time::Duration::from_millis(500)).await;
 
     // Second refresh to compute usage
-    sys.refresh_cpu_all();
+    sys.refresh_cpu_usage();
 
     // get cpu data
     let mut cpu_stats = CpuStats {

@@ -7,6 +7,15 @@
             const RED_THRESHOLD = 99;
 
             const secondsToFormattedTime = (seconds) => {
+
+                const fixLength = (time) => {
+                    if (time.length === 1) {
+                        return "0" + time
+                    } else {
+                        return time
+                    }
+                }
+
                 const ds = 86400
                 const hs = 3600
                 const ms = 60
@@ -17,9 +26,9 @@
                 const _seconds = seconds - days * ds - hours * hs - minutes * ms
 
                 return (days > 0 ? days + ":" : "") +
-                    (hours > 0 || (hours === 0 && days !== 0) ? hours + ":" : "") +
-                    (minutes > 0 || (minutes === 0 && hours !== 0 && days !== 0) ? minutes + ":" : "") +
-                    _seconds
+                    (hours > 0 || (hours === 0 && days !== 0) ? fixLength(hours) + ":" : "") +
+                    (minutes > 0 || (minutes === 0 && hours !== 0 && days !== 0) ? fixLength(minutes) + ":" : "") +
+                    fixLength(_seconds)
             }
 
             const updateDisplay = (data) => {
