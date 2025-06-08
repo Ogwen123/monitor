@@ -3,7 +3,7 @@ mod utils;
 use actix_web::{get, App, HttpResponse, HttpServer, Error};
 use actix_files::NamedFile;
 use std::path::PathBuf;
-use std::env::current_dir;
+use std::env::{current_dir, current_exe};
 use sysinfo::{Disks, System};
 use serde::Serialize;
 use crate::utils::logger::{fatal};
@@ -51,10 +51,15 @@ struct Stats {
 }
 
 fn get_dir_path() -> String {
+    let exe_path = current_exe().unwrap();
     if std::env::consts::OS == "linux" {
-        "src/pages/".to_string()
+        let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("/").collect();
+        path_vec.pop();
+        (path_vec.join("/") + "/pages/").to_string()
     } else if std::env::consts::OS == "windows" {
-        "src\\pages\\".to_string()
+        let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("\\").collect();
+        path_vec.pop();
+        (path_vec.join("\\") + "\\pages\\").to_string()
     } else {
         "".to_string()
     }
@@ -62,17 +67,13 @@ fn get_dir_path() -> String {
 
 #[get("/")]
 async fn index() -> actix_web::Result<NamedFile> {
-    let mut path: PathBuf = current_dir()?;
-    path.push(get_dir_path() + "index.html");
-    println!("{:?}", path);
+    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.html");
     Ok(NamedFile::open(path)?)
 }
 
 #[get("/index.css")] // why do I have to do this 💀
 async fn css() -> actix_web::Result<NamedFile> {
-    let mut path: PathBuf = current_dir()?;
-    path.push( get_dir_path() + "index.css");
-    println!("{:?}", path);
+    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.css");
     Ok(NamedFile::open(path)?)
 }
 
