@@ -3,7 +3,7 @@ mod utils;
 use actix_web::{get, App, HttpResponse, HttpServer, Error};
 use actix_files::NamedFile;
 use std::path::PathBuf;
-use std::env::{current_dir, current_exe};
+use std::env::current_dir;
 use sysinfo::{Disks, System};
 use serde::Serialize;
 use crate::utils::logger::{fatal};
@@ -68,7 +68,7 @@ async fn index() -> actix_web::Result<NamedFile> {
     Ok(NamedFile::open(path)?)
 }
 
-#[get("/index.css")] // why do i have to do this 💀
+#[get("/index.css")] // why do I have to do this 💀
 async fn css() -> actix_web::Result<NamedFile> {
     let mut path: PathBuf = current_dir()?;
     path.push( get_dir_path() + "index.css");
@@ -139,7 +139,7 @@ async fn stats() -> Result<HttpResponse, Error> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
+    println!("{}", std::env::consts::OS);
     if sysinfo::IS_SUPPORTED_SYSTEM == false {
         fatal!("This is not a supported operating system.");
         std::process::exit(1);
