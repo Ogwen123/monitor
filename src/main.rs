@@ -4,6 +4,8 @@ use actix_web::{get, App, HttpResponse, HttpServer, Error};
 use actix_files::NamedFile;
 use std::path::PathBuf;
 use std::env::current_exe;
+use std::time;
+use async_std::task;
 use sysinfo::{Disks, System};
 use serde::Serialize;
 use crate::utils::logger::{fatal};
@@ -71,14 +73,13 @@ fn get_dir_path() -> String {
 
 #[get("/")]
 async fn index() -> actix_web::Result<NamedFile> {
-    let path: PathBuf = PathBuf::from(get_dir_path() + "index.html");
-    println!("{}", get_dir_path() + "index.css");
+    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.html");
     Ok(NamedFile::open(path)?)
 }
 
 #[get("/index.css")] // why do I have to do this 💀
 async fn css() -> actix_web::Result<NamedFile> {
-    let path: PathBuf = PathBuf::from(get_dir_path() + "index.css");
+    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.css");
     Ok(NamedFile::open(path)?)
 }
 
@@ -86,6 +87,11 @@ async fn css() -> actix_web::Result<NamedFile> {
 async fn stats() -> Result<HttpResponse, Error> {
     let mut sys = System::new_all();
     sys.refresh_all();
+
+    sys.refresh_cpu_usage();
+    task::sleep(time::Duration::from_millis(500)).await;
+
+    sys.refresh_cpu_usage();
 
     // get cpu data
     let mut cpu_stats = CpuStats {
