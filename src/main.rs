@@ -3,7 +3,9 @@ mod utils;
 use actix_web::{get, App, HttpResponse, HttpServer, Error};
 use actix_files::NamedFile;
 use std::path::PathBuf;
-use std::env::{current_dir, current_exe};
+use std::env::current_exe;
+use std::time;
+use async_std::task;
 use sysinfo::{Disks, System};
 use serde::Serialize;
 use crate::utils::logger::{fatal};
@@ -81,6 +83,11 @@ async fn css() -> actix_web::Result<NamedFile> {
 async fn stats() -> Result<HttpResponse, Error> {
     let mut sys = System::new_all();
     sys.refresh_all();
+
+    task::sleep(time::Duration::from_millis(100)).await;
+
+    // Second refresh to compute usage
+    sys.refresh_cpu_all();
 
     // get cpu data
     let mut cpu_stats = CpuStats {
