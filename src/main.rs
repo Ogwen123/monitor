@@ -73,13 +73,13 @@ fn get_dir_path() -> String {
 
 #[get("/")]
 async fn index() -> actix_web::Result<NamedFile> {
-    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.html");
+    let path: PathBuf = PathBuf::from(get_dir_path() + "index.html");
     Ok(NamedFile::open(path)?)
 }
 
 #[get("/index.css")] // why do I have to do this 💀
 async fn css() -> actix_web::Result<NamedFile> {
-    let mut path: PathBuf = PathBuf::from(get_dir_path() + "index.css");
+    let path: PathBuf = PathBuf::from(get_dir_path() + "index.css");
     Ok(NamedFile::open(path)?)
 }
 
@@ -92,7 +92,6 @@ async fn stats() -> Result<HttpResponse, Error> {
     task::sleep(time::Duration::from_millis(500)).await;
 
     sys.refresh_cpu_usage();
-
     // get cpu data
     let mut cpu_stats = CpuStats {
         name: sys.cpus()[0].brand().trim().parse()?,
@@ -152,8 +151,6 @@ async fn stats() -> Result<HttpResponse, Error> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("{}", std::env::consts::OS);
-    println!("{:?}", sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
     if sysinfo::IS_SUPPORTED_SYSTEM == false {
         fatal!("This is not a supported operating system.");
         std::process::exit(1);
