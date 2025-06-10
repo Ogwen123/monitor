@@ -57,6 +57,14 @@ body {
     padding-bottom: 5px;
 }
 
+.sub-label {
+    font-size: medium;
+    font-style: italic;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+}
+
 /* navigation bar  */
 nav {
     background-color: #1c2128;
@@ -206,6 +214,12 @@ nav {
 #memory-container {
     padding-left: 10px;
     padding-right: 10px;
+}
+
+#memory-container-label,
+#swap-container-label {
+    display: flex;
+    justify-content: space-between;
 }
 
 #swap-container {
