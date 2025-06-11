@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <link rel="stylesheet" href="index.css" />
         <script>
@@ -7,6 +7,8 @@
             const ORANGE_THRESHOLD = 80;
             const RED_THRESHOLD = 99;
             const REFRESH_INTERVAL = 2000;
+
+            let interval;
 
             const secondsToFormattedTime = (seconds) => {
 
@@ -53,7 +55,7 @@
 
             }
 
-            const updateDisplay = (data) => {
+            const updateDisplay = (data) => { // update the realtime info
                 const coreCount = data.cpu.cores.length
                 for (let i = 0; i < coreCount; i++) {
                     let core = data.cpu.cores[i]
@@ -82,7 +84,7 @@
                 document.getElementById("loading-message").style = "display: none;"
 
                 // set navbar info
-                const navbar = document.getElementById("nav")
+                const navbar = document.getElementById("nav-info")
                 navbar.innerHTML = `<div class="nav-name">${data.name}</div><div class="nav-info">${data.os}, ${data.architecture}</div>`
                 document.getElementById("title").innerText = `Monitor: ${data.name}`
 
@@ -161,6 +163,11 @@
 
             }
 
+            const stopRefresh = () => {
+                console.log("hello")
+                localStorage.setItem("refresh", "false")
+            }
+
             // fetch the data
             const fetchData = () => {
                 fetch("/stats", {
@@ -170,6 +177,7 @@
                         showError()
                     } else {
                         res.json().then((data) => {
+                            if (localStorage.getItem("refresh") !== null && localStorage.getItem("refresh") === "false") clearInterval(interval)
                             updateDisplay(data)
                         })
                     }
@@ -184,7 +192,7 @@
                 } else {
                     res.json().then((data) => {
                         setDisplay(data)
-                        setInterval(fetchData, REFRESH_INTERVAL)
+                        interval = setInterval(fetchData, REFRESH_INTERVAL)
                     })
                 }
             })
@@ -198,7 +206,10 @@
         <title id="title">Monitor: Loading...</title>
     </head>
     <body>
-        <nav id="nav"></nav>
+        <nav id="nav">
+            <div id="nav-info"></div>
+            <button id="data-refresh-button" onclick="stopRefresh()">Stop Data Refreshing</button>
+        </nav>
         <div id="parent-container" style="display: none;">
             <div id="error" hidden="hidden"></div>
             <div class="container" id="top-container">
