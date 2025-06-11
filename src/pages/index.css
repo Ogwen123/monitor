@@ -94,13 +94,23 @@ nav {
     margin: 10px;
 }
 
+#refresh-alert {
+    font-size: large;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #data-refresh-button {
     background-color: #c0392b;
-    opacity: 75%;
     border: none;
     border-radius: 5px;
     margin: 10px;
     color: white;
+}
+
+#data-refresh-button:hover {
+    background-color: #9c2e22;
 }
 
 /* specific cards */
@@ -249,7 +259,7 @@ nav {
 }
 
 .disk-name {
-    width: 200px;
+    width: 300px;
 }
 
 .disk-usage-bar {
@@ -273,4 +283,13 @@ nav {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.disk-type,
+.disk-separator {
+    padding-left: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #bebebe;
 }

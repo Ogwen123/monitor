@@ -9,6 +9,7 @@
             const REFRESH_INTERVAL = 2000;
 
             let interval;
+            let refresh = true;
 
             const secondsToFormattedTime = (seconds) => {
 
@@ -151,6 +152,8 @@
                                 <div class="disk-usage-bar-background" style="background-color: ${usage > RED_THRESHOLD ? "#c0392b" : usage > ORANGE_THRESHOLD ? "#e67e22" : usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; width: ${Math.round(usage)}%;"></div>
                             </div>
                             <div class="disk-usage-info">${formatBytesValue(i.total_space - i.available_space)}/${formatBytesValue(i.total_space)}</div>
+                            <div class="disk-separator">•</div>
+                            <div class="disk-type">${i.disk_type}</div>
                         </div>
                        `
                 }
@@ -164,8 +167,8 @@
             }
 
             const stopRefresh = () => {
-                console.log("hello")
-                localStorage.setItem("refresh", "false")
+                refresh = false
+                document.getElementById("refresh-alert").innerText = "Refreshing stopped, reload page to restart"
             }
 
             // fetch the data
@@ -177,7 +180,7 @@
                         showError()
                     } else {
                         res.json().then((data) => {
-                            if (localStorage.getItem("refresh") !== null && localStorage.getItem("refresh") === "false") clearInterval(interval)
+                            if (refresh === false) clearInterval(interval)
                             updateDisplay(data)
                         })
                     }
@@ -208,6 +211,7 @@
     <body>
         <nav id="nav">
             <div id="nav-info"></div>
+            <div id="refresh-alert"></div>
             <button id="data-refresh-button" onclick="stopRefresh()">Stop Data Refreshing</button>
         </nav>
         <div id="parent-container" style="display: none;">
