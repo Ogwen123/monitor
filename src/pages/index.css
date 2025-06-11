@@ -212,8 +212,10 @@ nav {
 }
 
 #memory-container {
-    padding-left: 10px;
     padding-right: 10px;
+}
+#swap-container {
+    padding-left: 10px;
 }
 
 #memory-container-label,
@@ -224,4 +226,35 @@ nav {
 
 #swap-container {
     padding-right: 10px;
+}
+
+.disk-info {
+    margin-bottom: 10px;
+}
+
+.disk-name {
+    width: 200px;
+}
+
+.disk-usage-bar {
+    width: 800px;
+    height: 25px;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    border: #444c56 1px solid;
+}
+
+.disk-usage-bar-background {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.disk-usage-info {
+    padding-left: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

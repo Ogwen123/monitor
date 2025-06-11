@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <link rel="stylesheet" href="index.css" />
@@ -5,6 +6,7 @@
             const YELLOW_THRESHOLD = 50;
             const ORANGE_THRESHOLD = 80;
             const RED_THRESHOLD = 99;
+            const REFRESH_INTERVAL = 2000;
 
             const secondsToFormattedTime = (seconds) => {
 
@@ -32,7 +34,7 @@
             }
 
             const percentUsage = (used, total) => {
-                return Math.round((used/total) * 1000) / 10
+                return Math.round((used/total) * 100 * 10) / 10
             }
 
             const setUsageBar = (id, usage) => {
@@ -40,14 +42,13 @@
             }
 
             const formatBytesValue = (bytes) => {
+                const DECIMAL_DIGITS = 1;
+
                 if (bytes === 0) return "0B"
-                const digits = Math.round(Math.log10(bytes))
                 const order = Math.floor(Math.log2(bytes)/10)
                 if (order === 0) return bytes + "B"
                 const prefix = ["B", "KB", "MB", "GB", "TB", "PB"][order]
-                console.log(prefix)
-                const number = Math.round((bytes / Math.pow(2, order * 10)) * 100) / 100
-                console.log((Math.pow(2, order * 10) * 100))
+                const number = Math.round((bytes / Math.pow(2, order * 10)) * Math.pow(10, DECIMAL_DIGITS)) / Math.pow(10, DECIMAL_DIGITS)
                 return number.toString() + prefix
 
             }
@@ -135,6 +136,22 @@
                 setUsageBar("swap-usage-bar-background", swapUsage)
                 document.getElementById("swap-usage-label").innerText = swapUsage + "%"
                 document.getElementById("swap-label").innerText = `${formatBytesValue(data.memory.used_swap)}/${formatBytesValue(data.memory.total_swap)}`
+
+                //show disk information
+                const diskInfo = document.getElementById("disk-information")
+                console.log(data.disk)
+                for (let i of data.disk) {
+                    const usage = percentUsage(i.total_space - i.available_space, i.total_space)
+                    diskInfo.innerHTML += `
+                        <div class="container disk-info">
+                            <div class="disk-name">${i.name}</div>
+                            <div class="disk-usage-bar">
+                                <div class="disk-usage-bar-background" style="background-color: ${usage > RED_THRESHOLD ? "#c0392b" : usage > ORANGE_THRESHOLD ? "#e67e22" : usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; width: ${Math.round(usage)}%;"></div>
+                            </div>
+                            <div class="disk-usage-info">${formatBytesValue(i.total_space - i.available_space)}/${formatBytesValue(i.total_space)}</div>
+                        </div>
+                       `
+                }
             }
 
             const showError = (message) => {
@@ -167,7 +184,7 @@
                 } else {
                     res.json().then((data) => {
                         setDisplay(data)
-                        setInterval(fetchData, 2000)
+                        setInterval(fetchData, REFRESH_INTERVAL)
                     })
                 }
             })
@@ -274,7 +291,12 @@
                     </div>
                 </div>
             </div>
-            <div class="card" id="disk-card"></div>
+            <div class="card" id="disk-card">
+                <div id="disk-name" class="title">Disks</div>
+                <div class="col-container" id="disk-information">
+
+                </div>
+            </div>
         </div>
     <div id="loading-message">Collecting information...</div>
     </body>

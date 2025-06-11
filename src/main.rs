@@ -123,9 +123,14 @@ async fn stats() -> Result<HttpResponse, Error> {
     // get disk data
     let mut disk_vec: Vec<DiskUsage> = Vec::new();
 
-    let disks = Disks::new_with_refreshed_list();
+    let disks = Disks::new_with_refreshed_list(); 
     for disk in &disks {
         if disk.is_removable() { continue; }
+
+        if !disk.name().to_str().unwrap().starts_with("/dev/") && std::env::consts::OS == "linux" { // ignore disks that aren't actual disks
+            continue;
+        }
+
         let disk_stats = DiskUsage {
             name: disk.name().to_str().unwrap().parse()?,
             disk_type: disk.kind().to_string(),
