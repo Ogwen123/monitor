@@ -52,17 +52,17 @@ struct Stats {
     disk: Vec<DiskUsage>,
 }
 
-fn get_dir_path() -> String {
+fn get_dir_path() -> String { // only works for windows and linux
     let exe_path = current_exe().unwrap();
     if std::env::consts::OS == "linux" {
         let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("/").collect();
-        path_vec.pop();
+        path_vec.pop(); // go back 3 locations in the path
         path_vec.pop();
         path_vec.pop();
         (path_vec.join("/") + "/src/pages/").to_string()
     } else if std::env::consts::OS == "windows" {
         let mut path_vec: Vec<&str> = exe_path.to_str().unwrap().split("\\").collect();
-        path_vec.pop();
+        path_vec.pop(); // go back 3 locations in the path
         path_vec.pop();
         path_vec.pop();
         (path_vec.join("\\") + "\\src\\pages\\").to_string()
@@ -167,7 +167,7 @@ async fn main() -> std::io::Result<()> {
             .service(stats)
             .service(css)
     })
-        .bind(("0.0.0.0", 8080))?
+        .bind(("0.0.0.0", 5000))?
         .run()
         .await
 }
