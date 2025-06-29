@@ -3,13 +3,18 @@
     <head>
         <link rel="stylesheet" href="index.css" />
         <script>
-            const YELLOW_THRESHOLD = 50;
-            const ORANGE_THRESHOLD = 80;
-            const RED_THRESHOLD = 99;
-            const REFRESH_INTERVAL = 2000;
+            const YELLOW_THRESHOLD = 50
+            const ORANGE_THRESHOLD = 80
+            const RED_THRESHOLD = 99
+            const REFRESH_INTERVAL = 2000
+
+            const GREEN = "#71a27c"
+            const YELLOW = "#b79e6c"
+            const ORANGE = "#ee9849"
+            const RED = "#9c4a4b"
 
             let interval;
-            let refresh = true;
+            let refresh = true
 
             const secondsToFormattedTime = (seconds) => {
 
@@ -40,8 +45,8 @@
                 return Math.round((used/total) * 100 * 10) / 10
             }
 
-            const setUsageBar = (id, usage) => {
-                document.getElementById(id).style = `background-color: ${usage > RED_THRESHOLD ? "#c0392b" : usage > ORANGE_THRESHOLD ? "#e67e22" : usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; height: ${Math.round(usage)}%;`
+            const setUsageBar = (id, usage, dir = "height") => {
+                document.getElementById(id).style = `background-color: ${usage > RED_THRESHOLD ? RED : usage > ORANGE_THRESHOLD ? ORANGE : usage > YELLOW_THRESHOLD ? YELLOW : GREEN}; ${dir}: ${Math.round(usage)}%;`
             }
 
             const formatBytesValue = (bytes) => {
@@ -149,13 +154,14 @@
                         <div class="container disk-info">
                             <div class="disk-name">${i.name}</div>
                             <div class="disk-usage-bar">
-                                <div class="disk-usage-bar-background" style="background-color: ${usage > RED_THRESHOLD ? "#c0392b" : usage > ORANGE_THRESHOLD ? "#e67e22" : usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; width: ${Math.round(usage)}%;"></div>
+                                <div class="disk-usage-bar-background" id="${i.name}-usage-bar" ></div>
                             </div>
                             <div class="disk-usage-info">${formatBytesValue(i.total_space - i.available_space)}/${formatBytesValue(i.total_space)}</div>
                             <div class="disk-separator">•</div>
                             <div class="disk-type">${i.disk_type}</div>
                         </div>
                        `
+                    setUsageBar(`${i.name}-usage-bar`, usage, "width")
                 }
             }
 
