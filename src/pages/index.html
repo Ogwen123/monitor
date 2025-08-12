@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link rel="stylesheet" href="index.css" />
         <script>
+            const stopRefresh = () => {
+                localStorage.setItem("refresh", "false")
+                document.getElementById("refresh-alert").innerText = "Refreshing stopped, reload page to restart"
+            }
+        </script>
+
+        <script type="module">
+
+            import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
             const YELLOW_THRESHOLD = 50
             const ORANGE_THRESHOLD = 80
             const RED_THRESHOLD = 99
-            const REFRESH_INTERVAL = 2000
+            const REFRESH_INTERVAL_SEC = 2
+            const REFRESH_INTERVAL = REFRESH_INTERVAL_SEC * 1000
 
             const GREEN = "#71a27c"
             const YELLOW = "#b79e6c"
@@ -14,7 +24,6 @@
             const RED = "#9c4a4b"
 
             let interval;
-            let refresh = true
 
             const secondsToFormattedTime = (seconds) => {
 
@@ -71,7 +80,7 @@
                 const usage = data.cpu.average_usage
                 setUsageBar("overall-usage-bar-background", usage)
                 document.getElementById("overall-usage-label").innerText = Math.round(usage) + "%"
-                document.getElementById("uptime-info").innerText = secondsToFormattedTime(data.uptime) + "  (uptime)"
+                document.getElementById("uptime-info").innerText = secondsToFormattedTime(data.uptime)
 
 
                 const memoryUsage = percentUsage(data.memory.used_memory, data.memory.total_memory)
@@ -115,9 +124,10 @@
                     let core = data.cpu.cores[i]
                     coreContainer.innerHTML += `
                     <div class="core">
+
                     <div
                         class="core-background"
-                        style="background-color: ${core.usage > RED_THRESHOLD ? "#c0392b" : core.usage > ORANGE_THRESHOLD ? "#e67e22" : core.usage > YELLOW_THRESHOLD ? "#f5e801" : "#1bab45"}; height: ${Math.round(core.usage)}%;"
+                        style="background-color: ${core.usage > RED_THRESHOLD ? RED : core.usage > ORANGE_THRESHOLD ? ORANGE : core.usage > YELLOW_THRESHOLD ? YELLOW : GREEN}; height: ${Math.round(core.usage)}%;"
                         id="${core.name}-background"
                     ></div>
                     <div class="core-label" id="${core.name}-label">${Math.round(core.usage)}%
@@ -131,8 +141,8 @@
                 document.getElementById("overall-usage-label").innerText = Math.round(data.cpu.average_usage) + "%"
 
                 document.getElementById("core-count-info").innerText = data.cpu.cores.length + " Cores"
-                document.getElementById("freq-info").innerText = data.cpu.frequency + " MHz (Base Clock)"
-                document.getElementById("uptime-info").innerText = secondsToFormattedTime(data.uptime) + "  (uptime)"
+                document.getElementById("freq-info").innerText = data.cpu.frequency + " MHz"
+                document.getElementById("uptime-info").innerText = secondsToFormattedTime(data.uptime)
 
                 // set memory info
                 const memoryUsage = percentUsage(data.memory.used_memory, data.memory.total_memory)
@@ -172,11 +182,6 @@
 
             }
 
-            const stopRefresh = () => {
-                refresh = false
-                document.getElementById("refresh-alert").innerText = "Refreshing stopped, reload page to restart"
-            }
-
             // fetch the data
             const fetchData = () => {
                 fetch("/stats", {
@@ -186,13 +191,22 @@
                         showError()
                     } else {
                         res.json().then((data) => {
-                            if (refresh === false) clearInterval(interval)
+                            if (localStorage.getItem("refresh") === "false") clearInterval(interval)
                             updateDisplay(data)
+                            graphData.push({index: graphData[graphData.length - 1].index + 1, usage: data.cpu.average_usage})
+                            console.log(graphData)
+                            if (graphData.length > DATA_POINTS) {
+                                graphData = graphData.slice(graphData.length - (DATA_POINTS + 1))
+                            }
+                            update()
                         })
                     }
                 })
             }
 
+            let graphData = [
+            ]
+            localStorage.setItem("refresh", "true")
             fetch("/stats", { // do initial data fetch and page setup
                 method: "GET"
             }).then((res) => {
@@ -202,16 +216,81 @@
                     res.json().then((data) => {
                         setDisplay(data)
                         interval = setInterval(fetchData, REFRESH_INTERVAL)
+                        graphData.push({index: 0, usage: data.cpu.average_usage})
+                        update()
                     })
                 }
             })
 
+            const indexToTime = (index, graphData) => {
+                console.log(graphData[graphData.length - 1].index)
+                console.log(graphData[graphData.length - 1].index - DATA_POINTS)
+                const overflow = Math.max(0, graphData[graphData.length - 1].index - DATA_POINTS);
+                return ((graphData.length - 1) - (index - overflow)) * REFRESH_INTERVAL_SEC
+            }
 
+            const width = 600;
+            const height = 330;
+            const marginTop = 20;
+            const marginRight = 30;
+            const marginBottom = 30;
+            const marginLeft = 40;
+
+            const DATA_POINTS = 60;
+            const HISTORY_TIME = DATA_POINTS * REFRESH_INTERVAL_SEC;
+
+            const svg = d3.create("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", [0, 0, width, height])
+                .attr("overflow", "hidden")
+                .attr("style", "max-width: 100%; height: auto;");
+
+            const defs = svg.append("defs");
+            const gradient = defs.append("linearGradient")
+                .attr("id", "line-gradient")
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", 0).attr("y1", 0)
+                .attr("x2", 0).attr("y2", height);
+
+            gradient.append("stop").attr("offset", "0%").attr("stop-color", RED);
+            gradient.append("stop").attr("offset", `${100 - YELLOW_THRESHOLD}%`).attr("stop-color", YELLOW);
+            gradient.append("stop").attr("offset", `${100 - ORANGE_THRESHOLD}%`).attr("stop-color", ORANGE);
+            gradient.append("stop").attr("offset", `100%`).attr("stop-color", GREEN);
+
+            const x = d3.scaleLinear().domain([HISTORY_TIME, 0]).range([marginLeft, width - marginRight]);
+            const y = d3.scaleLinear().domain([0, 100]).range([height - marginBottom, marginTop]);
+
+            const line = d3.line()
+                .curve(d3.curveLinear)
+                .x(d => x(indexToTime(d.index, graphData)))
+                .y(d => y(d.usage));
+
+            const path = svg.append("path")
+                .datum(graphData)
+                .attr("fill", "none")
+                .attr("stroke", "url(#line-gradient)")
+                .attr("stroke-width", 1)
+                .attr("d", line);
+
+            svg.append("g")
+                .attr("transform", `translate(0,${height - marginBottom})`)
+                .call(d3.axisBottom(x).ticks(5));
+            svg.append("g")
+                .attr("transform", `translate(${marginLeft}, 0)`)
+                .call(d3.axisLeft(y));
+
+            function update() {
+                path
+                    .datum(graphData)
+                    .attr("d", line);
+            }
+
+            // Draw first point
+            update();
+            document.getElementById("d3-cpu-graph").append(svg.node());
         </script>
-        <style>
-
-
-        </style>
+        <link rel="stylesheet" href="index.css" />
         <title id="title">Monitor: Loading...</title>
     </head>
     <body>
@@ -243,6 +322,7 @@
                                     </div>
                                 </div>
                         </div>
+                        <div id="d3-cpu-graph"></div>
                         <div class="col-container" id="cpu-info-container">
                             <div class="label">CPU Information</div>
                             <div class="col-container" id="info-containers-container">

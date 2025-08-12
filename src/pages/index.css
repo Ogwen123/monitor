@@ -142,12 +142,16 @@ nav {
 #all-core-container {
     padding-left: 10px;
     padding-right: 10px;
-    width: calc(100% / 3);
+    width: 10%;
 }
 
 #per-core-container {
     padding-right: 10px;
-    width: calc(100% / 3);
+    width: 30%;
+}
+
+#d3-cpu-graph {
+    width: 45%;
 }
 
 .core {
@@ -186,7 +190,7 @@ nav {
 #overall-usage-bar,
 #memory-usage-bar,
 #swap-usage-bar {
-    width: 200px;
+    width: 100%;
     height: 255px;
     border-radius: 5px;
     overflow: hidden;
@@ -210,12 +214,12 @@ nav {
     align-items: center;
     justify-content: center;
     height: 20px;
-    width: 200px;
+    width: 100%;
 }
 
 #cpu-info-container {
     padding-left: 10px;
-    width: calc(100% / 3);
+    width: 15%;
 }
 
 #info-containers-container {
@@ -242,9 +246,11 @@ nav {
 
 #memory-container {
     padding-right: 10px;
+    width: calc(50% - 10px);
 }
 #swap-container {
     padding-left: 10px;
+    width: calc(50% - 10px);
 }
 
 #memory-container-label,
