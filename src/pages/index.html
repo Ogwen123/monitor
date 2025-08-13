@@ -281,9 +281,6 @@
             function update() {
                 path
                     .datum(graphData)
-                    .transition()
-                    .duration(REFRESH_INTERVAL)
-                    .ease(d3.easeLinear)
                     .attr("d", line);
             }
 
