@@ -254,8 +254,6 @@
                 .attr("x2", 0).attr("y2", height);
 
             gradient.append("stop").attr("offset", "0%").attr("stop-color", RED);
-            gradient.append("stop").attr("offset", `${100 - YELLOW_THRESHOLD}%`).attr("stop-color", YELLOW);
-            gradient.append("stop").attr("offset", `${100 - ORANGE_THRESHOLD}%`).attr("stop-color", ORANGE);
             gradient.append("stop").attr("offset", `100%`).attr("stop-color", GREEN);
 
             const x = d3.scaleLinear().domain([HISTORY_TIME, 0]).range([marginLeft, width - marginRight]);
@@ -283,6 +281,9 @@
             function update() {
                 path
                     .datum(graphData)
+                    .transition()
+                    .duration(REFRESH_INTERVAL)
+                    .ease(d3.easeLinear)
                     .attr("d", line);
             }
 
